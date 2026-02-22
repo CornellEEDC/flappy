@@ -46,9 +46,10 @@ void setup() {
 
 void loop() {
 
-  if(checkDistance(-1, sensor, BUZZER_PIN, true)) {
+  if(checkDistance(50, sensor, BUZZER_PIN, true)) {
     return;
   }
+
 
   delay(10); 
 }
