@@ -1,3 +1,7 @@
+/**
+* Test script for the stepper motor
+*/
+
 /*
   suggested wiring for motor driver
     wire from UNO_5V to loc_POW
@@ -11,37 +15,54 @@
 
 int steps_per_rev = 200; // approx ~1.8' per step
 
-// the number of revolutions it takes to get from the bottom of the bar, to the top
-// NEEDS TO BE MEASURED
-int revs_per_bar = 20;
+/**
+* the number of revolutions it takes to get from the bottom of the bar, to the top.
+* NEEDS TO BE MEASURED
+*/
+const int revs_per_bar = 2000;
 
-// meant for full-step mode
-float suggested_curr = 1.4; // Amperes
+/**
+* Current in Amperes. Meant for full-step mode.
+* Max ~1.7 (unloaded or loaded)
+*/
+float suggested_curr = 1.7;
 
 // each of the five direction pins in order
 int direction_pins[5] = {2, 31, 31, 31, 31};
+//5 step pins, in order
 int step_pins[5] = {3, 31, 31, 31, 31};
 
-// the index of the pipes we will adjust
-// MUST BE INTEGER in {0,1,2,3,4}
+/**
+* the index of the pipes we will adjust.
+* MUST BE INTEGER in {0,1,2,3,4}
+*/
 int pipes_to_adj = 0;
 
 
-// the desired revolutions away from the bottom for pipes_to_adj
-// MUST BE BETWEEN 0 <= x <= revs_per_bar
-float desired_pos = 20.0;
+/**
+* the desired revolutions away from the bottom for pipes_to_adj. Position 0 = top.
+* MUST BE BETWEEN 0 <= x <= revs_per_bar
+*/
+float desired_pos = 2000.0;
 
-// stored floats representing the current revolutions away from the bottom of the bar
-// for each of the 5 pipes
-// MUST BE LESS THAN REVS_PER_BAR
+/*
+* stored floats representing the current revolutions away from the bottom of the bar
+* for each of the 5 pipes.
+* MUST BE LESS THAN REVS_PER_BAR
+*/
 float pipe_positions[5] = {0, 0, 0, 0, 0};
 
-// delay_time is the time between every step, in microseconds
-// MUST BE NONNEGATIVE
-int delay_time = 1000;
+/*
+* delay_time is the time between every step, in microseconds. 
+* Minimum ~400 unloaded, ~450 with bar inserted.
+* MUST BE NONNEGATIVE
+*/
+int delay_time = 450;
 
-// the time it takes for a pipe to do a full revolution about the track (seconds)
-// MUST BE NONNEGATIVE
+/**
+* the time it takes for a pipe to do a full revolution about the track (seconds).
+* MUST BE NONNEGATIVE
+*/ 
 float pipe_revolution_time = 10.0;
 
 
@@ -58,6 +79,8 @@ void setup() {
       pinMode(direction_pins[i], OUTPUT);
     }
   }
+
+  // Serial.begin(115200);
 }
 
 // PLACEHOLDER
@@ -84,8 +107,14 @@ void loop() {
   // // CURRENTLY OFFSETS BY HOWEVER LONG IT TAKES TO ADJUST THE PIPES
 }
 
-// changes the position of the pipes pipe_index, from pipe_positions[pipe_index],
-// into desired_pos
+
+/**
+* changes the position of the pipes pipe_index, from pipe_positions[pipe_index],
+* into desired_pos
+* @param pipe_index pipe number to use. Must be on the interval [0, 4]
+* @param desired_pos final position to go to. Must be on the interval [0, revs_per_bar (a global constant)]
+* @return time, in ms, taken to move
+*/
 int change_pos(int pipe_index, float desired_pos) {
 
   // time taken to move the pipes, in milliseconds
@@ -114,6 +143,7 @@ int change_pos(int pipe_index, float desired_pos) {
     delayMicroseconds(delay_time);
     time_elapsed += 1;
     digitalWrite(step_pins[pipe_index], LOW);
+    // Serial.println(i);
     delayMicroseconds(delay_time);
     time_elapsed += 1;
   }
@@ -125,7 +155,14 @@ int change_pos(int pipe_index, float desired_pos) {
   return time_elapsed;
 }
 
-// describes the time in milliseconds elapsed to change the 
+
+/**
+* Returns the time in milliseconds elapsed to change the position of pipe `pipe_index` to `desired_pos`
+* 
+* @param pipe_index number of pipe to test
+* @param desired_pos position to calculate from
+* @return milliseconds to move the pipe
+*/
 int change_pos_time(int pipe_index, float desired_pos) {
 
   // time taken to move the pipes, in milliseconds
